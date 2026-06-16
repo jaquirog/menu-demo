@@ -82,6 +82,10 @@ img{display:block}
 .foot{text-align:center;padding:22px 16px 8px;color:var(--muted);font-size:12px}
 .foot b{color:var(--brand)}.foot .v{display:inline-block;margin-top:6px;font-weight:700;color:var(--ink)}
 .demo-flag{background:#fff5e0;border:1px solid #f0dcab;color:#8a6a1e;font-size:12px;text-align:center;padding:9px;margin:14px;border-radius:12px;font-weight:600}
+.testbox{margin:14px 18px 6px;padding:13px 14px;background:#fff3d6;border:2px solid #e0a43a;border-radius:14px}
+.testbox label{display:block;font-size:13.5px;font-weight:800;color:#8a5a06;margin-bottom:7px;line-height:1.3}
+.testbox input{width:100%;border:1px solid #e7d9b8;border-radius:9px;padding:9px 11px;font-size:15px;outline:none}
+.testbox .testnote{display:block;font-size:10.5px;color:#a99a7e;margin-top:5px;line-height:1.3}
 </style>
 </head>
 <body>
@@ -90,7 +94,7 @@ img{display:block}
 <div class="badge-open">● Abierto ahora</div>
 <div class="overlay"><h1>Donde Marta 🔥</h1><div class="tag">Comida típica santandereana · a la brasa</div><div class="meta"><span>⭐ 4.8</span><span>🕐 12 m – 10 pm</span><span>📍 Bucaramanga</span></div></div>
 </div>
-<div class="demo-flag">👋 Menú de <b>ejemplo</b> de Vértice Digital. Toca un plato para verlo en grande y agrégalo.</div>
+<div class="demo-flag">👋 Menú de <b>ejemplo</b> de Vértice Digital. Agrega platos y, al abrir tu pedido, <b>pon tu número para recibirlo en TU WhatsApp</b> 👇</div>
 <nav class="cats" id="cats"></nav>
 <main id="menu"></main>
 <div class="foot">Menú digital hecho por <b>Vértice Digital</b><br><span class="v">📲 ¿Quieres uno igual para tu restaurante? Escríbenos</span></div>
@@ -103,12 +107,13 @@ img{display:block}
 <div class="df"><div class="dqty"><button onclick="dQty(-1)">−</button><span id="dQ">1</span><button onclick="dQty(1)">+</button></div><button class="dadd" id="dAdd" onclick="dAddCart()">Agregar</button></div>
 </div>
 <div class="sheet" id="sheet">
-<div class="sh-h"><h3>Tu pedido 🛒</h3><p>Revisa y envíalo por WhatsApp</p></div>
+<div class="sh-h"><h3>Tu pedido 🛒</h3><p>Revisa y envíalo por WhatsApp</p></div><div class="testbox"><label>🧪 PRUÉBALO: pon tu número y recibe este pedido en TU WhatsApp</label><input id="testNum" type="tel" inputmode="numeric" placeholder="Ej: 300 123 4567" oninput="setTest(this.value)"><span class="testnote">Solo para probar el funcionamiento. En tu menú final esto no aparece: tu número ya estará configurado.</span></div>
 <div class="items" id="sheetItems"></div>
 <div class="sh-f"><div class="tot"><span>Total</span><span id="sTotal">$0</span></div><button class="wabtn" onclick="sendWhatsApp()">📲 Pedir por WhatsApp</button></div>
 </div>
 <script>
 var WA_NUMBER="573138259922";
+var TEST_NUM="";var testTimer=null;
 var REST="Donde Marta";
 var U="https://upload.wikimedia.org/wikipedia/commons/";
 var MENU=[
@@ -198,12 +203,20 @@ function renderSheet(){
 function openSheet(){renderSheet();document.getElementById('scrim').classList.add('show');document.getElementById('sheet').classList.add('show');}
 function closeSheet(){document.getElementById('sheet').classList.remove('show');document.getElementById('scrim').classList.remove('show');}
 function closeAll(){closeDetail();closeSheet();}
+function setTest(v){
+  var d=(''+v).replace(/\D/g,'');
+  if(d.length>=10 && d.indexOf('3')===0){d='57'+d.slice(-10);}
+  TEST_NUM=d;
+  if(testTimer){clearTimeout(testTimer);}
+  testTimer=setTimeout(function(){TEST_NUM='';var el=document.getElementById('testNum');if(el){el.value='';}},20*60*1000);
+}
 function sendWhatsApp(){
+  var TARGET=(TEST_NUM&&TEST_NUM.length>=11)?TEST_NUM:WA_NUMBER;
   if(Object.keys(cart).length===0){alert('Agrega al menos un plato 🙂');return;}
   var msg='¡Hola '+REST+'! 🍽️ Quiero hacer un pedido:%0A%0A',t=0;
   for(var id in cart){var it=flat[id],q=cart[id];t+=it.p*q;msg+='• '+q+'x '+it.n+' — '+money(it.p*q)+'%0A';}
   msg+='%0A*Total: '+money(t)+'*%0A%0A¿Me confirman disponibilidad y tiempo de entrega? 🙌';
-  window.open('https://wa.me/'+WA_NUMBER+'?text='+msg,'_blank');
+  window.open('https://wa.me/'+TARGET+'?text='+msg,'_blank');
 }
 render();updateBar();
 </script>
